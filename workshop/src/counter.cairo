@@ -1,3 +1,4 @@
+// counter contract
 #[starknet::interface]
 trait ICounter<TContractState> {
     fn get_counter(self: @TContractState) -> u32;
@@ -9,24 +10,15 @@ pub mod Counter {
     use core::starknet::event::EventEmitter;
     use starknet::{get_caller_address, ContractAddress};
     use kill_switch::{IKillSwitchDispatcher, IKillSwitchDispatcherTrait};
-    use openzeppelin::access::ownable::OwnableComponent;
-
-    component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
-
-    #[abi(embed_v0)]
-    impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
-    impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
     #[storage]
     struct Storage {
         counter: u32,
-        kill_switch: ContractAddress,
-        #[substorage(v0)]
-        ownable: OwnableComponent::Storage
+        kill_switch: ContractAddress
     }
 
     // this event will emit whenever the state variable counter increases
-    #[derive(Drop, PartialEq, starknet::Event)]
+    #[derive(Copy, Drop, Debug, PartialEq, starknet::Event)]
     struct CounterIncreased {
        #[key]
        pub value: u32
@@ -34,11 +26,9 @@ pub mod Counter {
 
     // event enum 
     #[event]
-    #[derive(Drop, PartialEq, starknet::Event)]
+    #[derive(Copy, Drop, Debug, PartialEq, starknet::Event)]
     pub enum Event {
-        CounterIncreased: CounterIncreased,
-        #[flat]
-        OwnableEvent: OwnableComponent::Event
+        CounterIncreased: CounterIncreased
     }
 
     #[constructor]
